@@ -4,6 +4,7 @@ from . models import Tutorial
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
+from . forms import NewUserForm
 
 # Create your views here.
 def homepage( request ) :
@@ -13,7 +14,7 @@ def homepage( request ) :
 def register( request ) :
 
 	if request.method == "POST" :
-		form = UserCreationForm(request.POST)
+		form = NewUserForm(request.POST)
 
 		if form.is_valid() :
 			user = form.save()
@@ -26,7 +27,7 @@ def register( request ) :
 			for error in form.error_messages :
 				messages.error(request, f"{error} : {form.error_messages[error]}")
 
-	form = UserCreationForm()
+	form = NewUserForm()
 	return render( request = request, template_name = "main/register.html", \
 					context = { "form" : form } )
 
