@@ -1,15 +1,45 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from . models import Tutorial
+from . models import Tutorial, TutorialCategory, TutorialSeries
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from . forms import NewUserForm
 
+
 # Create your views here.
+# def homepage( request ) :
+# 	return render( request=request, template_name = 'main/homepage.html', \
+# 					context = {"tutorials" : Tutorial.objects.all} )
+
 def homepage( request ) :
-	return render( request=request, template_name = 'main/homepage.html', \
-					context = {"tutorials" : Tutorial.objects.all} )
+	return render( request = request, template_name = "main/categories.html", \
+		context = { "categories" : TutorialCategory.objects.all})
+
+def single_slug( request, single_slug ) :
+	categorie_slugs = [c.slugs for c in TutorialCategory.objects.all()]
+	if single_slug in categorie_slugs :
+
+		matching_series = TutorialSeries.objects.filter( category__slugs = single_slug )
+		series_urls = {}
+		for m in matching_series.all() :
+			part_one = Tutorial.objects.filter(tutorial_series__series = m.series).earliest("tutorial_published")
+			series_urls[m] = part_one.slug
+
+		return render( request = request, template_name = "main/category.html", context = { 'part_ones' : series_urls } )
+
+	tutorial_slugs = [t.slug for t in Tutorial.objects.all()]
+	if single_slug in tutorial_slugs :
+		tutorial = Tutorial.objects.get( slug = single_slug )
+		tutorials_from_same_series = Tutorial.objects.filter(tutorial_series__series = tutorial.tutorial_series).order_by("tutorial_published")
+		active_tutorial_id = list(tutorials_from_same_series).index(tutorial)
+		return render( request = request,
+						template_name = "main/tutorial.html",
+						context = { 'tutorial' : tutorial,
+									'tutorials_from_same_series' : tutorials_from_same_series,
+									'active_tutorial_id' : active_tutorial_id } )
+
+	return HttpResponse( f"{single_slug} was nowhere to be found!!" )
 
 def register( request ) :
 

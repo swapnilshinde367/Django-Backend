@@ -1,13 +1,13 @@
 {% extends "main/header.html" %}
 {% block content %}
 <div class="row">
-	{% for category in categories %}
+	{% for tutorial,part_one in part_ones.items %}
 		<div class="col s12 m4">
-			<a href="{{category.slugs}}">
+			<a href="{{part_one}}">
 				<div class="card hoverable">
 					<div class="card-content black-text">
-						<span class="card-title">{{category.category}}</span>
-						<p>{{category.summary|safe}}</p>
+						<span class="card-title">{{tutorial.series}}</span>
+						<p>{{tutorial.summary|safe}}</p>
 					</div>
 				</div>
 			</a>
